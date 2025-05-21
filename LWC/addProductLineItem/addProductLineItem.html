@@ -1,0 +1,296 @@
+<!--
+    @description       : Lighting web Component for Opportunity add products component
+    @author            : Apurba Singh, Appstrail             
+    @last modified on  : 13-03-2023
+    @last modified by  : Apurba Singh, Appstrail
+    Modifications Log 
+    Ver   Date         Author          Modification
+    1.0   13-03-2023   Apurba Singh   Initial Version
+-->
+<template>
+    <!--Header-->
+    <header class="slds-modal__header">
+        <h2 class="slds-modal__title slds-hyphenate">Add Product</h2>
+        <!-- <p if:true={pricebookName}>Price Book: {pricebookName}</p> -->
+    </header>
+
+    <!--Loading spinner-->
+    <div if:true={load}>
+        <div class="demo-only demo--inverse" style="height:250px;position:relative">
+            <div role="status" class="slds-spinner slds-spinner_medium">
+                <span class="slds-assistive-text">Loading</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+            </div>
+        </div>
+    </div>
+
+    <!--Body start-->
+    <div class="slds-modal__content slds-p-around_medium modal-body" if:false={load}>
+
+        <!--First page start-->
+        <template if:false={nextPage}>
+            <div class="slds-grid slds-wrap">
+                <div class="slds-col slds-size_1-of-1">
+                    <!--Search Field-->
+                    <div class="search-field">
+                        <lightning-input type="search" variant="label-hidden" placeholder="Search by Product Line Item"
+                            onkeyup={handleSearch} data-id="searchInput">
+                        </lightning-input>
+                        Selected Product ({selectedProduct.length})
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-1">
+                    <!--Illustration component-->
+                    <div if:true={noProduct}>
+                        <c-illustration-component text-value="No Products Found">
+                        </c-illustration-component>
+                    </div>
+
+                    <!--Data table start-->
+                    <div if:false={noProduct} style="height:250px;" class="slds-scrollable">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th class="slds-text-title_caps table-header-text" scope="col">
+                                        <div class="slds-truncate" title="Select">Select</div>
+                                    </th>
+                                    <th class="slds-text-title_caps table-header-text" scope="col">
+                                        <div class="slds-truncate" title="Product Name">Product Name</div>
+                                    </th>
+                                    <th class="slds-text-title_caps table-header-text" scope="col">
+                                        <div class="slds-truncate" title="Product Code" style="width: 50px;">Size</div>
+                                    </th>
+                                    <th class="slds-text-title_caps table-header-text" scope="col">
+                                        <div class="slds-truncate" title="List Price" style="width: 50px;">Price</div>
+                                    </th>
+                                    <!-- <th class="slds-text-title_caps table-header-text" scope="col">
+                                        <div class="slds-truncate" title="Product Description">Product Description</div>
+                                    </th> 
+                                    <th class="slds-text-title_caps table-header-text" scope="col">
+                                        <div class="slds-truncate"></div>
+                                    </th>-->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="7" if:true={noAccPro} style="height:50px;">
+                                        Add Products to Account to be shown here.
+                                    </td>
+                                </tr>
+                                <template for:each={productList} for:item="product">
+                                    <tr class="slds-hint-parent" key={product.Id}>
+                                        <td scope="row" style="width: 80px; text-align:center;">
+                                            <lightning-input type="checkbox" variant="label-hidden"
+                                                onchange={handleProductSelect} name={product.Id}
+                                                checked={product.check}>
+                                            </lightning-input>
+                                        </td>
+                                        <th scope="row">
+                                            <div class="slds-truncate" title={product.Name}>
+                                                <!-- <a href={product.nameUrl} name={product.Id} tabindex="-1">{product.Name}</a> -->
+                                                {product.Name}
+                                            </div>
+                                        </th>
+                                        <td scope="row">
+                                            <div class="slds-truncate" title={product.Size__c}>
+                                                {product.Size__c}
+                                            </div>
+                                        </td>
+                                        <td scope="row">
+                                            <div class="slds-truncate"> 
+                                                <lightning-formatted-number value={product.Price__c}
+                                                    format-style="currency" currency-code={currencyCode}>
+                                                </lightning-formatted-number>
+                                            </div>
+                                        </td>
+                                        <!-- <td scope="row">
+                                            <div class="slds-truncate" title={product.Description__c}>
+                                                {product.Description__c}
+                                            </div>
+                                        </td> 
+                                        <td scope="row"></td>-->
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--Data table end-->
+
+                </div>
+            </div>
+        </template>
+        <!--First Page end-->
+
+        <!--Second Page end-->
+        <template if:true={nextPage}>
+            <div style="height:300px;">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                    <thead>
+                        <tr class="slds-line-height_reset">
+                            <th class="slds-text-title_caps table-header-text" scope="col" style="width:12rem;">
+                                <div class="slds-truncate" title="Product Name">Product Name</div>
+                            </th>
+                            <th class="slds-text-title_caps table-header-text" scope="col" style="width:24rem;">
+                                <div class="slds-truncate" style="width:3.5rem;" title="List Price">Size</div>
+                            </th>
+                            <th class="slds-text-title_caps table-header-text" scope="col">
+                                <div class="slds-truncate" title="List Price">List Price</div>
+                            </th>
+                            <th class="slds-text-title_caps table-header-text" scope="col">
+                                <div class="slds-truncate" title="Quantity"><abbr class="slds-required" title="required">*</abbr>Quantity</div>
+                            </th>
+                            <th class="slds-text-title_caps table-header-text" scope="col">
+                                <div class="slds-truncate" title="Sales Price">Sales Price</div>
+                            </th>
+                            <th class="slds-text-title_caps table-header-text" scope="col">
+                                <div class="slds-truncate" title="Total Price">Total Price</div>
+                            </th>
+                            <th class="slds-text-title_caps table-header-text" scope="col">
+                                <div class="slds-truncate"></div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={selectedProduct} for:item="product">
+                            <tr class="slds-hint-parent" key={product.Id}>
+                                <th scope="row">
+                                    <div class="slds-truncate" title={product.Name}>
+                                       {product.Name}
+                                    </div>
+                                </th>
+                                <td scope="row">
+                                    <lightning-textarea type="textarea" name="size" min="0" step="0.01"
+                                        variant="label-hidden" value={product.Size__c} data-id={product.Id}
+                                        onchange={handleFieldChange}>
+                                        </lightning-textarea>
+                                </td>
+                                <!-- <th scope="row">
+                                    <div class="slds-truncate" title={product.Price__c}>
+                                        {product.Price__c}
+                                    </div>
+                                </th> -->
+                                <td scope="row">
+                                    
+                                    <!-- <lightning-input type="number" name="listPrice" formatter="currency" step="0.01"
+                                        variant="label-hidden" value={product.List_Price__c} readonly>
+                                    </lightning-input> -->
+                                    <template if:true={currencyINR}>
+                                        <lightning-input type="number" name="listPrice" formatter="currency" step="0.01"
+                                            variant="label-hidden" value={product.Price__c} readonly
+                                            style="width: 100%;">
+                                        </lightning-input>
+                                    </template>
+                                    <template if:false={currencyINR}>
+                                        <div class="slds-form-element__control slds-input-has-fixed-addon">
+                                            <span class="slds-form-element__addon">{currencyCode}</span>
+                                            <lightning-input type="number"
+                                                name="listPrice" step="0.01" style="width: 100%;"
+                                                variant="label-hidden" value={product.List_Price__c} readonly>
+                                            </lightning-input>
+                                        </div>
+                                    </template>
+                                </td>
+                                <td scope="row">
+                                    <lightning-input type="number" name="quantity" min="0" step="0.01"
+                                        variant="label-hidden" value={product.Quantity__c} data-id={product.Id}
+                                        onchange={handleFieldChange}>
+                                    </lightning-input>
+                                </td>
+                                <td scope="row">
+                                    <!-- <lightning-input type="number" name="SalesPrice" formatter="currency" step="0.01"
+                                        variant="label-hidden" value={product.Sales_Price__c} data-id={product.Id}
+                                        onchange={handleFieldChange}>
+                                    </lightning-input> -->
+                                    <template if:false={currencyINR}>
+                                        <lightning-input type="number" name="SalesPrice" formatter="currency" step="0.01"
+                                            variant="label-hidden" value={product.Sales_Price__c} data-id={product.Id}
+                                            onchange={handleFieldChange} style="width: 100%;">
+                                        </lightning-input>
+                                    </template>
+                                    <template if:true={currencyINR}>
+                                        <div class="slds-form-element__control slds-input-has-fixed-addon">
+                                            <span class="slds-form-element__addon">{currencyCode}</span>
+                                            <lightning-input type="number" name="SalesPrice" step="0.01"
+                                                variant="label-hidden" value={product.Sales_Price__c} data-id={product.Id}
+                                                onchange={handleFieldChange} style="width: 100%;">
+                                            </lightning-input>
+                                        </div>
+                                    </template>
+                                </td>
+                                <td scope="row">
+                                    <!-- <lightning-input type="number" name="TotalPrice" formatter="currency" step="0.01"
+                                        variant="label-hidden" readonly value={product.Total_Price__c}>
+                                    </lightning-input> -->
+                                    <template if:false={currencyINR}>
+                                        <lightning-input type="number" name="TotalPrice" formatter="currency" step="0.01"
+                                            variant="label-hidden" value={product.Total_Price__c} data-id={product.Id}
+                                            onchange={handleFieldChange} style="width: 100%;" readonly>
+                                        </lightning-input>
+                                    </template>
+                                    <template if:true={currencyINR}>
+                                        <div class="slds-form-element__control slds-input-has-fixed-addon">
+                                            <span class="slds-form-element__addon">{currencyCode}</span>
+                                            <lightning-input type="number" name="TotalPrice" step="0.01"
+                                                variant="label-hidden" value={product.Total_Price__c} data-id={product.Id}
+                                                onchange={handleFieldChange} style="width: 100%;" readonly>
+                                            </lightning-input>
+                                        </div>
+                                    </template>
+                                </td>
+                                <td scope="row" style="width: 65px;">
+                                    <lightning-button-icon icon-name="utility:delete" variant="border-filled" 
+                                        title="Delete" name={product.Id} onclick={handleDelete}>
+                                    </lightning-button-icon>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+        <!--Second page end-->
+
+    </div>
+
+    <!--Footer-->
+    <footer class="slds-modal__footer">
+        <!--First page footer-->
+        <template if:false={nextPage}>
+            <button class="slds-button slds-button_neutral" onclick={handleCancel}>Cancel</button>
+            <button class="slds-button slds-button_brand" disabled={disabledButton} onclick={handleNext}>Next</button>
+        </template>
+
+        <!--second page footer-->
+        <template if:true={nextPage}>
+            <button class="slds-button slds-button_neutral slds-float_left" onclick={handleBack}>Back</button>
+            <button class="slds-button slds-button_neutral" onclick={handleCancel}>Cancel</button>
+            <button class="slds-button slds-button_brand" disabled={disabledButton} onclick={handleSave}>Save</button>
+        </template>
+    </footer>
+
+    <!--Choose Price Book modal start-->
+    <template if:true={choosePriceBook}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container" style="width:50%;">
+                <!--Header start-->
+                <header class="slds-modal__header slds-modal__header_empty">
+                    <!--close button-->
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" 
+                        title="Close" onclick={handleCancel}>
+                        <lightning-icon icon-name="utility:close" 
+                            variant="inverse" 
+                            size="small">
+                        </lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                </header>
+                <!--Header end-->
+
+               
+            </div>
+        </section>
+        <!--Background blur-->
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>
